@@ -46,6 +46,17 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+app.post("/register", (req, res) => {
+  const userEmail = req.body.email;
+  const password = req.body.password;
+  console.log(userEmail, password);
+  res.redirect(`/urls`)
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
