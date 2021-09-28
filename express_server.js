@@ -73,7 +73,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.updateLongURL;
+  // Only replaces if truthy (ex. if empty str, does nothing)
+  if (req.body.updateLongURL) {
+    urlDatabase[req.params.shortURL] = req.body.updateLongURL;
+  }
   res.redirect(`/urls`);
 });
 
