@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
 
@@ -75,7 +76,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, 10);
   if (!email || !password) {
     res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.');
   } else if (retrieveInfo(email, "email", users)) {
@@ -102,13 +103,13 @@ app.post("/login", (req, res) => {
   const id = retrieveInfo(email, "email", users);
   if (!email || !password || !id) {
     res.status(400).send('Error 400 - Bad request. Invalid e-mail or password.');
-  } else if (password !== users[id].password) {
+  } else if (bcrypt.compareSync(password, users[id].password)) {
+    res.cookie("user_id", id);
+    res.redirect(`/urls`);
+  } else {
     // Wrong password. Msg states for email/password due to security reasons:
     // https://stackoverflow.com/questions/14922130/which-error-message-is-better-when-users-entered-a-wrong-password
     res.status(400).send('Error 400 - Bad request. Invalid e-mail or password.');
-  } else {
-    res.cookie("user_id", id);
-    res.redirect(`/urls`);
   }
 });
 
@@ -123,6 +124,7 @@ app.get("/urls", (req, res) => {
       user_id: users[req.cookies.user_id],
       urls: retrieveInfo(req.cookies.user_id, "userID", urlDatabase, false) };
     res.render("urls_index", templateVars);
+    console.log(users)
   } else {
     res.redirect("/login");
   }
