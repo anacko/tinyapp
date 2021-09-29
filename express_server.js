@@ -9,8 +9,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" },
+  "b2xVn3": { longURL: "http://www.lighthouselabs.ca", userID: "user2RandomID" },
+  "9sm5xi": { longURL: "http://www.google.com", userID: "user2RandomID" },
+  "9sm5xL": { longURL: "http://www.canada.ca", userID: "user2RandomID" },
+  "A2xVn3": { longURL: "http://www.lighthouselabs.ca", userID: "userMyself" },
+  "98m5xL": { longURL: "http://www.canada.ca", userID: "userMyself" }
 };
 
 const users = {
@@ -42,11 +47,16 @@ const generateRandomString = function() {
   return str;
 };
 
-const retrieveInfo = function(checkParam, objItem, obj) {
-  for (let item in obj) {
-    if (obj[item][objItem] === checkParam) return item;
+const retrieveInfo = function(checkParam, dbParam, db, single=true) {
+  const allOccurrences = {};
+  for (let item in db) {
+    if (db[item][dbParam] === checkParam) {
+		if (single) { return item; }
+		allOccurrences[item] = db[item];
   }
-  return false;
+  }
+  if (Object.keys(allOccurrences).length === 0) { return false; }
+  return allOccurrences;
 };
 
 app.get("/", (req, res) => {
@@ -59,7 +69,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { user_id: users[req.cookies.user_id] };
+  const templateVars = { user_id: null };
   res.render("register", templateVars);
 });
 
@@ -105,19 +115,22 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id")
+  res.clearCookie("user_id");
   res.redirect("/");
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { user_id: users[req.cookies.user_id], urls: urlDatabase };
+  const templateVars = {
+    user_id: users[req.cookies.user_id],
+    urls: retrieveInfo(req.cookies.user_id, "userID", urlDatabase, false) };
+  console.log(templateVars.urls)
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   if (req.cookies.user_id) {
     const shortURL = generateRandomString();
-    urlDatabase[shortURL] = req.body.longURL;
+    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.cookies.user_id };
     res.redirect(`/urls/${shortURL}`);
   } else {
     res.status(403).send('Error 403 - Forbidden. User not logged in.')
@@ -137,7 +150,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user_id: users[req.cookies.user_id],
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render("urls_show", templateVars);
 });
@@ -150,13 +163,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL/update", (req, res) => {
   // Only replace if truthy. Ex. if empty str, do nothing and return to /urls.
   if (req.body.updateLongURL) {
-    urlDatabase[req.params.shortURL] = req.body.updateLongURL;
+    urlDatabase[req.params.shortURL].longURL = req.body.updateLongURL;
   }
   res.redirect(`/urls`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
