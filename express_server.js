@@ -123,8 +123,11 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     user_id: users[req.cookies.user_id],
     urls: retrieveInfo(req.cookies.user_id, "userID", urlDatabase, false) };
-  console.log(templateVars.urls)
-  res.render("urls_index", templateVars);
+  if (!templateVars.user_id) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -152,25 +155,43 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL
   };
-  res.render("urls_show", templateVars);
+  if (!templateVars.user_id) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls`);
+  const templateVars = { user_id: users[req.cookies.user_id] };
+  if (!templateVars.user_id) {
+    res.redirect("/login");
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect(`/urls`);
+  }
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  // Only replace if truthy. Ex. if empty str, do nothing and return to /urls.
-  if (req.body.updateLongURL) {
-    urlDatabase[req.params.shortURL].longURL = req.body.updateLongURL;
+  const templateVars = { user_id: users[req.cookies.user_id] };
+  if (!templateVars.user_id) {
+    res.redirect("/login");
+  } else {
+    // Only replace if truthy. Ex. if empty str, do nothing and return to /urls.
+    if (req.body.updateLongURL) {
+      urlDatabase[req.params.shortURL].longURL = req.body.updateLongURL;
+    }
+    res.redirect(`/urls`);
   }
-  res.redirect(`/urls`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send("<h1>Oh, no! We couldn't find this url!</h1>");
+  } else {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
 });
 
 app.listen(PORT, () => {
