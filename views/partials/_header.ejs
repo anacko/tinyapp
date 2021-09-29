@@ -9,13 +9,9 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         
-        <% if (!username.id) { %> <!-- NOTE: Position requires alignment to the right -->
-          <div class="navbar-item form-inline"> 
-            <form method="POST" action="/login">
-              <input class="form-control" type="text" name="user_id" placeholder="Username" style="width: 300px"> <!-- Maybe change "name" -->
-              <button type="submit" class="btn btn-outline-secondary">Submit</button> 
-            </form>
-          </div>
+        <% if (!username) { %> <!-- NOTE: requires formatting -->
+          <a class="navbar-item nav-link" href="/login">Login</a>
+          <a class="navbar-item nav-link" href="/register">Register</a>
           <% } else { %>
             <div class="navbar-item form-inline"> 
               <form method="POST" action="/logout">

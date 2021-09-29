@@ -37,9 +37,9 @@ const generateRandomString = function() {
   return str;
 };
 
-const checkIfExists = function(checkParam, objItem, obj) {
+const retrieveInfo = function(checkParam, objItem, obj) {
   for (let item in obj) {
-    if (obj[item][objItem] === checkParam) return true;
+    if (obj[item][objItem] === checkParam) return item;
   }
   return false;
 };
@@ -56,16 +56,6 @@ app.get("/hello", (req, res) => {
   res.send(`<html><body>Hello <b>World</b>.</body></html>\n`);
 });
 
-app.post("/login", (req, res) => { /// Maybe login button needs testing
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
-});
-
-app.post("/logout", (req, res) => { /// LOGOUT BUTTON NEEDS FIX!
-  res.cookie("user_id", { });
-  res.redirect("/urls");
-});
-
 app.get("/register", (req, res) => {
   res.render("register");
 });
@@ -75,15 +65,42 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
-    res.status(400).send('Bad Request. Invalid e-mail or password.')
-  } else if (!checkIfExists(email, users, "email")) {
-    res.status(400).send('Bad Request. E-mail already registered.')
+    res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.')
+  } else if (retrieveInfo(email, "email", users)) {
+    res.status(400).send('Error 400 - Bad Request. E-mail already registered.')
   } else {
     users[id] = { id, email, password };
     console.log(users)
     res.cookie("user_id", id)
     res.redirect(`/urls`)
   }
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = retrieveInfo(email, "email", users)
+  if (!email || !password) {
+    res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.')
+  } else if (!id) {
+    res.status(403).send('Error 403 - Forbidden. E-mail not registered.')
+  } else {
+    if (password !== users[id].password) {
+      res.status(403).send('Error 403 - Forbidden. Password doesn\'t match.')
+    } else {
+      res.cookie("user_id", id)
+      res.redirect(`/urls`)
+    }
+  }
+});
+
+app.post("/logout", (req, res) => {
+  res.cookie("user_id", "");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
