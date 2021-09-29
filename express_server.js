@@ -17,7 +17,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "purple"
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -45,15 +45,12 @@ const retrieveInfo = function(checkParam, objItem, obj) {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send(`<html><body>Hello <b>World</b>.</body></html>\n`);
+  const isLoggedIn = req.cookies.user_id;
+  if (isLoggedIn) {
+  res.redirect(`/urls`);
+  } else {
+  res.redirect(`/login`);
+  }
 });
 
 app.get("/register", (req, res) => {
@@ -101,7 +98,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.cookie("user_id", "");
-  res.redirect("/urls");
+  res.redirect("/");
 });
 
 app.get("/urls", (req, res) => {
