@@ -9,17 +9,17 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         
-        <% if (!username) { %> <!-- NOTE: Position requires alignment to the right -->
+        <% if (!username.user_id) { %> <!-- NOTE: Position requires alignment to the right -->
           <div class="navbar-item form-inline"> 
             <form method="POST" action="/login">
-              <input class="form-control" type="text" name="username" placeholder="Username" style="width: 300px">
+              <input class="form-control" type="text" name="username" placeholder="Username" style="width: 300px"> <!-- Maybe change "name" -->
               <button type="submit" class="btn btn-outline-secondary">Submit</button> 
             </form>
           </div>
           <% } else { %>
             <div class="navbar-item form-inline"> 
               <form method="POST" action="/logout">
-                Logged in as <%- username %>
+                Logged in as <%- username.email %>
                 <button type="submit" class="btn btn-outline-secondary">Logout</button>
               </form>
             </div>
