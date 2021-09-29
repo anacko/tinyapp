@@ -13,18 +13,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 const generateRandomString = function() {
   let source = 'abcdefghijklmnopqrstuvwxyz';
@@ -32,7 +32,7 @@ const generateRandomString = function() {
   source += '0123456789';
   let str = '';
   for (let k = 1; k <= 6; k++) {
-    str += source[Math.floor(Math.random()*source.length)];
+    str += source[Math.floor(Math.random() * source.length)];
   }
   return str;
 };
@@ -57,7 +57,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = { user_id: users[req.cookies.user_id] };
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -65,35 +66,35 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
-    res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.')
+    res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.');
   } else if (retrieveInfo(email, "email", users)) {
-    res.status(400).send('Error 400 - Bad Request. E-mail already registered.')
+    res.status(400).send('Error 400 - Bad Request. E-mail already registered.');
   } else {
     users[id] = { id, email, password };
-    console.log(users)
-    res.cookie("user_id", id)
-    res.redirect(`/urls`)
+    res.cookie("user_id", id);
+    res.redirect(`/urls`);
   }
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  const templateVars = { user_id: users[req.cookies.user_id] };
+  res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const id = retrieveInfo(email, "email", users)
+  const id = retrieveInfo(email, "email", users);
   if (!email || !password) {
-    res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.')
+    res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.');
   } else if (!id) {
-    res.status(403).send('Error 403 - Forbidden. E-mail not registered.')
+    res.status(403).send('Error 403 - Forbidden. E-mail not registered.');
   } else {
     if (password !== users[id].password) {
-      res.status(403).send('Error 403 - Forbidden. Password doesn\'t match.')
+      res.status(403).send('Error 403 - Forbidden. Password doesn\'t match.');
     } else {
-      res.cookie("user_id", id)
-      res.redirect(`/urls`)
+      res.cookie("user_id", id);
+      res.redirect(`/urls`);
     }
   }
 });
@@ -104,27 +105,26 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { username: users[req.cookies.user_id], urls: urlDatabase };
-  console.log(templateVars)
+  const templateVars = { user_id: users[req.cookies.user_id], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: users[req.cookies.user_id] }
+  const templateVars = { user_id: users[req.cookies.user_id] };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString()
+  const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    username: users[req.cookies.user_id], 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL] 
+  const templateVars = {
+    user_id: users[req.cookies.user_id],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
   };
   res.render("urls_show", templateVars);
 });
@@ -135,7 +135,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  // Only replaces if truthy (ex. if empty str, does nothing)
+  // Only replace if truthy. Ex. if empty str, do nothing and return to /urls.
   if (req.body.updateLongURL) {
     urlDatabase[req.params.shortURL] = req.body.updateLongURL;
   }

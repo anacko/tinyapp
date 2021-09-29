@@ -4,23 +4,22 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
+    <div class="collapse navbar-collapse container-fluid" id="navbarNavAltMarkup">
+      <ul class="nav navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        
-        <% if (!username) { %> <!-- NOTE: requires formatting -->
-          <a class="navbar-item nav-link" href="/login">Login</a>
-          <a class="navbar-item nav-link" href="/register">Register</a>
-          <% } else { %>
-            <div class="navbar-item form-inline"> 
-              <form method="POST" action="/logout">
-                Logged in as <%- username.email %>
-                <button type="submit" class="btn btn-outline-secondary">Logout</button>
-              </form>
-            </div>
-            <% } %>
-          </div>
+      </ul>
+      <% if (!user_id) { %>
+        <ul class="nav navbar-nav">
+          <li><a class="nav nav-link" href="/login">Login</a></li>
+          <li><a class="nav nav-link" href="/register">Register</a></li>
+        </ul>
+      <% } else { %>
+        <form class="navbar-form" method="POST" action="/logout">
+          <label style="padding-right: 10px; vertical-align: bottom">Logged in as <%- user_id.email %></label>
+          <button type="submit" class="btn btn-outline-dark">Logout</button>
+        </form>
+      <% } %>
     </div>
   </nav>
 </header>

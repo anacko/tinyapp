@@ -12,17 +12,16 @@
 
   <body>
 
-    <!-- <%-// include('partials/_header') %> -->
+    <%- include('partials/_header') %>
 
-    <main style="text-align: center">
-      <h3 class="bg-success" style="padding: 0.5em">Login</h3>
+    <main style="margin: 1em">
+      <h3>Login</h3>
       <form action="/login" method="POST">
-        <div class="form-group">
-          <br><p>To login, inform your e-mail and password:</p><br>
-          <input display="block" type="email" name="email" placeholder="user@email.com" style="width: 300px; text-align: center;"><br>
-          <input display="block" type="password" name="password" placeholder="insert password" style="width: 300px; margin: 1em; text-align: center;"><br>
-          <button type="submit" class="btn btn-success">Submit</button>
-        </div>
+        <br><label>Email address</label>
+        <input class="form-control" type="email" name="email" placeholder="Enter email" style="width: 300px">
+        <br><label>Password</label>
+        <input class="form-control" type="password" name="password" placeholder="Password" style="width: 300px">
+        <br><button type="submit" class="btn btn-primary">Login</button>
       </form>
     </main>
       <!-- Bootstrap JS -->
