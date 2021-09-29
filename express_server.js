@@ -14,6 +14,11 @@ const urlDatabase = {
 };
 
 const users = {
+  "userMyself": {
+    id: "userMyself",
+    email: "user@email.com",
+    password: "pass"
+  },
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
@@ -59,7 +64,6 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) {
@@ -67,6 +71,10 @@ app.post("/register", (req, res) => {
   } else if (retrieveInfo(email, "email", users)) {
     res.status(400).send('Error 400 - Bad Request. E-mail already registered.');
   } else {
+    let id = generateRandomString();
+    while (retrieveInfo(id, "id", users)) {
+      id = generateRandomString();
+    }
     users[id] = { id, email, password };
     res.cookie("user_id", id);
     res.redirect(`/urls`);
@@ -74,7 +82,7 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { user_id: users[req.cookies.user_id] };
+  const templateVars = { user_id: null };
   res.render("login", templateVars);
 });
 
@@ -97,7 +105,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.cookie("user_id", "");
+  res.clearCookie("user_id")
   res.redirect("/");
 });
 
@@ -106,15 +114,23 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
-  const templateVars = { user_id: users[req.cookies.user_id] };
-  res.render("urls_new", templateVars);
+app.post("/urls", (req, res) => {
+  if (req.cookies.user_id) {
+    const shortURL = generateRandomString();
+    urlDatabase[shortURL] = req.body.longURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(403).send('Error 403 - Forbidden. User not logged in.')
+  }
 });
 
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
+app.get("/urls/new", (req, res) => {
+  const templateVars = { user_id: users[req.cookies.user_id] };
+  if (!templateVars.user_id) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
