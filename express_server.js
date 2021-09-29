@@ -37,6 +37,13 @@ const generateRandomString = function() {
   return str;
 };
 
+const checkIfExists = function(checkParam, objItem, obj) {
+  for (let item in obj) {
+    if (obj[item][objItem] === checkParam) return true;
+  }
+  return false;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -49,13 +56,13 @@ app.get("/hello", (req, res) => {
   res.send(`<html><body>Hello <b>World</b>.</body></html>\n`);
 });
 
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+app.post("/login", (req, res) => { /// Maybe login button needs testing
+  res.cookie("user_id", req.body.username);
   res.redirect("/urls");
 });
 
-app.post("/logout", (req, res) => {
-  res.cookie("username", "");
+app.post("/logout", (req, res) => { /// LOGOUT BUTTON NEEDS FIX!
+  res.cookie("user_id", { });
   res.redirect("/urls");
 });
 
@@ -67,13 +74,21 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  users[id] = { id, email, password };
-  res.cookie("user_id", id)
-  res.redirect(`/urls`)
+  if (!email || !password) {
+    res.status(400).send('Bad Request. Invalid e-mail or password.')
+  } else if (!checkIfExists(email, users, "email")) {
+    res.status(400).send('Bad Request. E-mail already registered.')
+  } else {
+    users[id] = { id, email, password };
+    console.log(users)
+    res.cookie("user_id", id)
+    res.redirect(`/urls`)
+  }
 });
 
 app.get("/urls", (req, res) => {
   const templateVars = { username: users[req.cookies.user_id], urls: urlDatabase };
+  console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -89,7 +104,11 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { username: users[req.cookies.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { 
+    username: users[req.cookies.user_id], 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL] 
+  };
   res.render("urls_show", templateVars);
 });
 
