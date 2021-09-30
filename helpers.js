@@ -14,6 +14,42 @@ const generateRandomString = function(n = 6) {
   return str;
 };
 
+/**
+ * Retrieve information (key of object) inside a dataset (object).
+ * @param {String} email Information to look for. Intended to be an email address.
+ * @param {Object} dataset External object, the dataset.
+ * @param {String} dataParam Default 'email', is the field name to look for the required information.
+ * @returns {String/Boolean} Returns the key (such as user). If no matches, return false.
+ */
+ const findUserByEmail = function(email, dataset, dataParam='email') {
+  for (let item in dataset) {
+    if (dataset[item][dataParam] === email) {
+      return item;
+    }
+  }
+  return false;
+};
+
+/**
+ * Retrieve subset of a dataset (object of objects).
+ * @param {String} user Information for the subset. Intended to subset by user.
+ * @param {Object} dataset External object, the dataset.
+ * @param {String} dataParam Default 'userID', is the field name to look for the required information.
+ * @returns {Object/Boolean} Returns the subset, object of objects. If no matches, return false.
+ */
+const subsetUrlsByUser = function(user, dataset, dataParam='userID') {
+  const allOccurrences = {};
+  for (let item in dataset) {
+    if (dataset[item][dataParam] === user) {
+		allOccurrences[item] = dataset[item];
+  }
+  }
+  if (Object.keys(allOccurrences).length === 0) { 
+    return false; 
+  }
+  return allOccurrences;
+}
+
 
 /**
  * Retrieve information, key or subset, of an object inside an external object (like a database).
@@ -22,8 +58,11 @@ const generateRandomString = function(n = 6) {
  * @param {Object} db External object, the "database".
  * @param {Boolean} single Default true, single key matching the search. If false, subset of all matching params.
  * @returns {String/Object/Boolean} If single=true, returns key; if false, returns subset. If no matches, return false.
+ * 
+ * NOTE: In the application, it was applied for 2 very different things. REPLACED BY: findUserByEmail and subsetUrlsByUser
+ * Still exported for testing purposes: it works and testing script illustrates how.
  */
-const retrieveInfo = function(checkParam, dbParam, db, single=true) {
+ const retrieveInfo = function(checkParam, dbParam, db, single=true) {
   const allOccurrences = {};
   for (let item in db) {
     if (db[item][dbParam] === checkParam) {
@@ -35,4 +74,4 @@ const retrieveInfo = function(checkParam, dbParam, db, single=true) {
   return allOccurrences;
 };
 
-module.exports = { generateRandomString, retrieveInfo };
+module.exports = { generateRandomString, retrieveInfo, findUserByEmail, subsetUrlsByUser };

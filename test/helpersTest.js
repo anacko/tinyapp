@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { retrieveInfo, generateRandomString } = require('../helpers.js');
+const { generateRandomString, retrieveInfo, findUserByEmail, subsetUrlsByUser } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -50,6 +50,40 @@ describe('retrieveInfo', function() {
     const user = retrieveInfo("userNotInDb", "userID", testUrlDatabase, false);
     const expectedOutput = false;
     assert.deepEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`)
+  });
+
+});
+
+describe('findUserByEmail', function() {
+  it('should return a user with valid email', function() {
+    const user = findUserByEmail("user@example.com", testUsers);
+    const expectedOutput = "userRandomID";
+    assert.strictEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`);
+  });
+
+  it('should return false for a user with invalid email', function() {
+    const user = findUserByEmail("invalidUser@example.com", testUsers);
+    const expectedOutput = false;
+    assert.strictEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`);
+  });
+});
+
+describe('subsetUrlsByUser', function() {
+
+  it('should return the subset of all short URLs of a valid user', function() {
+    const subset = subsetUrlsByUser("user2RandomID", testUrlDatabase, "userID");
+    const expectedOutput = {  
+      'b2xVn3': { longURL: 'http://www.lighthouselabs.ca', userID: 'user2RandomID' },
+      '9sm5xi': { longURL: 'http://www.google.com', userID: 'user2RandomID' },
+      '9sm5xL': { longURL: 'http://www.canada.ca', userID: 'user2RandomID'}
+    };
+    assert.deepEqual(subset, expectedOutput, `Expected to find ${expectedOutput} but found ${subset}.`)
+  });
+
+  it('should return false for short URLs of an invalid user', function() {
+    const subset = subsetUrlsByUser("userNotInDB", testUrlDatabase, "userID");
+    const expectedOutput = false;
+    assert.deepEqual(subset, expectedOutput, `Expected to find ${expectedOutput} but found ${subset}.`)
   });
 
 });
