@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const helpers = require('helpers');
 const app = express();
 const PORT = 8080;
 
@@ -41,29 +42,6 @@ const users = {
   }
 };
 
-const generateRandomString = function() {
-  let source = 'abcdefghijklmnopqrstuvwxyz';
-  source += source.toUpperCase();
-  source += '0123456789';
-  let str = '';
-  for (let k = 1; k <= 6; k++) {
-    str += source[Math.floor(Math.random() * source.length)];
-  }
-  return str;
-};
-
-const retrieveInfo = function(checkParam, dbParam, db, single=true) {
-  const allOccurrences = {};
-  for (let item in db) {
-    if (db[item][dbParam] === checkParam) {
-		if (single) { return item; }
-		allOccurrences[item] = db[item];
-  }
-  }
-  if (Object.keys(allOccurrences).length === 0) { return false; }
-  return allOccurrences;
-};
-
 app.get('/', (req, res) => {
   const isLoggedIn = req.session.user_id;
   if (isLoggedIn) {
@@ -83,12 +61,12 @@ app.post('/register', (req, res) => {
   const password = bcrypt.hashSync(req.body.password, 10);
   if (!email || !password) {
     res.status(400).send('Error 400 - Bad Request. Invalid e-mail or password.');
-  } else if (retrieveInfo(email, 'email', users)) {
+  } else if (helpers.retrieveInfo(email, 'email', users)) {
     res.status(400).send('Error 400 - Bad Request. E-mail already registered.');
   } else {
-    let id = generateRandomString();
-    while (retrieveInfo(id, 'id', users)) {
-      id = generateRandomString();
+    let id = helpers.generateRandomString();
+    while (helpers.retrieveInfo(id, 'id', users)) {
+      id = helpers.generateRandomString();
     }
     users[id] = { id, email, password };
     req.session.user_id = id;
@@ -104,7 +82,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const id = retrieveInfo(email, 'email', users);
+  const id = helpers.retrieveInfo(email, 'email', users);
   if (!email || !password || !id) {
     res.status(400).send('Error 400 - Bad request. Invalid e-mail or password.');
   } else if (bcrypt.compareSync(password, users[id].password)) {
@@ -127,7 +105,7 @@ app.get('/urls', (req, res) => {
   if (req.session.user_id) {
     const templateVars = {
       user_id: users[req.session.user_id],
-      urls: retrieveInfo(req.session.user_id, 'userID', urlDatabase, false) };
+      urls: helpers.retrieveInfo(req.session.user_id, 'userID', urlDatabase, false) };
     res.render('urls_index', templateVars);
   } else {
     res.redirect('/login');
@@ -136,7 +114,7 @@ app.get('/urls', (req, res) => {
 
 app.post('/urls', (req, res) => {
   if (req.session.user_id) {
-    const shortURL = generateRandomString();
+    const shortURL = helpers.generateRandomString();
     urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
     res.redirect(`/urls/${shortURL}`);
   } else {
@@ -170,7 +148,7 @@ app.get('/urls/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
-    const templateVars = { user_id: users[req.session.user_id] };
+    const templateVars = { user_id: users[req.session.user_id] }; /// <----- STILL REQUIRED ????
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
   } else {
@@ -180,7 +158,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 app.post('/urls/:shortURL/update', (req, res) => {
   if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
-    const templateVars = { user_id: users[req.session.user_id] };
+    const templateVars = { user_id: users[req.session.user_id] }; //// <---- STILL REQUIRED ????
     // Only replace if truthy. Ex. if empty str, do nothing and return to /urls.
     if (req.body.updateLongURL) {
       urlDatabase[req.params.shortURL].longURL = req.body.updateLongURL;
