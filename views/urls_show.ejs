@@ -13,6 +13,8 @@
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+        <p class="card-text">Visited <%= timesVisited %> times.</a></p>
+        <p class="card-text">Created at <%= creationDate %>.</a></p>
       </div>
       <div class="card-footer text-muted">
         <form method="POST" action="/urls/<%= shortURL %>/update">

@@ -4,13 +4,13 @@ const { generateRandomString, retrieveInfo, findUserByEmail, subsetUrlsByUser } 
 
 const testUsers = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -32,12 +32,12 @@ describe('retrieveInfo', function() {
 
   it('should return the subset of all short URLs of a valid user', function() {
     const user = retrieveInfo("user2RandomID", "userID", testUrlDatabase, false);
-    const expectedOutput = {  
+    const expectedOutput = {
       'b2xVn3': { longURL: 'http://www.lighthouselabs.ca', userID: 'user2RandomID' },
       '9sm5xi': { longURL: 'http://www.google.com', userID: 'user2RandomID' },
       '9sm5xL': { longURL: 'http://www.canada.ca', userID: 'user2RandomID'}
     };
-    assert.deepEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`)
+    assert.deepEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`);
   });
 
   it('should return false for a user with invalid email', function() {
@@ -49,7 +49,7 @@ describe('retrieveInfo', function() {
   it('should return false for short URLs of an invalid user', function() {
     const user = retrieveInfo("userNotInDb", "userID", testUrlDatabase, false);
     const expectedOutput = false;
-    assert.deepEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`)
+    assert.deepEqual(user, expectedOutput, `Expected to find ${expectedOutput} but found ${user}.`);
   });
 
 });
@@ -72,18 +72,18 @@ describe('subsetUrlsByUser', function() {
 
   it('should return the subset of all short URLs of a valid user', function() {
     const subset = subsetUrlsByUser("user2RandomID", testUrlDatabase, "userID");
-    const expectedOutput = {  
+    const expectedOutput = {
       'b2xVn3': { longURL: 'http://www.lighthouselabs.ca', userID: 'user2RandomID' },
       '9sm5xi': { longURL: 'http://www.google.com', userID: 'user2RandomID' },
       '9sm5xL': { longURL: 'http://www.canada.ca', userID: 'user2RandomID'}
     };
-    assert.deepEqual(subset, expectedOutput, `Expected to find ${expectedOutput} but found ${subset}.`)
+    assert.deepEqual(subset, expectedOutput, `Expected to find ${expectedOutput} but found ${subset}.`);
   });
 
   it('should return false for short URLs of an invalid user', function() {
     const subset = subsetUrlsByUser("userNotInDB", testUrlDatabase, "userID");
     const expectedOutput = false;
-    assert.deepEqual(subset, expectedOutput, `Expected to find ${expectedOutput} but found ${subset}.`)
+    assert.deepEqual(subset, expectedOutput, `Expected to find ${expectedOutput} but found ${subset}.`);
   });
 
 });

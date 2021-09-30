@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ['some-veryveryveryvery-long-key-1', 'not-so-long key 2, but ok!']
-}))
+}));
 
 const urlDatabase = {};
 const users = {};
@@ -83,9 +83,9 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
   req.session.user_id = null;
-  res.redirect('/'); 
+  res.redirect('/');
 });
-// NOTE: the requirement was to redirect to /urls. It will lead to an error msg (as previous requirement asked for). 
+// NOTE: the requirement was to redirect to /urls. It will lead to an error msg (as previous requirement asked for).
 // As we would redirecting it and it is not an error, it made more sense redirect to the root (and from there, to the login page.)
 
 app.get('/urls', (req, res) => {
@@ -104,10 +104,14 @@ app.get('/urls', (req, res) => {
 app.post('/urls', (req, res) => {
   if (req.session.user_id) {
     const shortURL = generateRandomString();
-    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.session.user_id,
+      creationDate: (new Date()).toString(),
+      timesVisited: 0};
     res.redirect(`/urls/${shortURL}`);
   } else {
-    res.status(401).send('Error 401 - Unauthorized. User not logged in.')
+    res.status(401).send('Error 401 - Unauthorized. User not logged in.');
   }
 });
 
@@ -123,13 +127,15 @@ app.get('/urls/new', (req, res) => {
 // Note: instead of /urls/:id
 app.get('/urls/:shortURL', (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send('Error 404 - Not found.')
+    res.status(404).send('Error 404 - Not found.');
     // only owner of shortURL may access this page (same for post delete and update)
   } else if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     const templateVars = {
       user_id: users[req.session.user_id],
       shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      timesVisited: urlDatabase[req.params.shortURL].timesVisited,
+      creationDate: urlDatabase[req.params.shortURL].creationDate
     };
     res.render('urls_show', templateVars);
   } else {
@@ -150,7 +156,8 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:shortURL/update', (req, res) => {
   if (urlDatabase[req.params.shortURL] && urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     // Only replace if truthy. Ex. if empty str, do nothing and return to /urls.
-    if (req.body.updateLongURL) {
+    if (req.body.updateLongURL && req.body.updateLongURL !== urlDatabase[req.params.shortURL].longURL) {
+      urlDatabase[req.params.shortURL].timesVisited = 0;
       urlDatabase[req.params.shortURL].longURL = req.body.updateLongURL;
     }
     res.redirect('/urls');
@@ -164,9 +171,13 @@ app.get('/u/:shortURL', (req, res) => {
     res.status(404).send('Error 404 - Not found. We couldn\'t find this url!');
   } else {
     const longURL = urlDatabase[req.params.shortURL].longURL;
+    urlDatabase[req.params.shortURL].timesVisited++;
     res.redirect(longURL);
   }
 });
+// Note: the /urls has an href that also redirects the short url to the long.
+// That does not count as visit because it's internal and the point is to inform the user
+// how many times other people used the link. Therefore, only the /u/:shortURL counts.
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

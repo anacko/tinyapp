@@ -1,6 +1,6 @@
 /**
  * Generates a random string.
- * @param {Number} n Length of the string. Default is 6. 
+ * @param {Number} n Length of the string. Default is 6.
  * @returns {String} Random string (A-Z + a-z + 0-9) with n characters.
  */
 const generateRandomString = function(n = 6) {
@@ -21,7 +21,7 @@ const generateRandomString = function(n = 6) {
  * @param {String} dataParam Default 'email', is the field name to look for the required information.
  * @returns {String/Boolean} Returns the key (such as user). If no matches, return false.
  */
- const findUserByEmail = function(email, dataset, dataParam='email') {
+const findUserByEmail = function(email, dataset, dataParam = 'email') {
   for (let item in dataset) {
     if (dataset[item][dataParam] === email) {
       return item;
@@ -37,18 +37,18 @@ const generateRandomString = function(n = 6) {
  * @param {String} dataParam Default 'userID', is the field name to look for the required information.
  * @returns {Object/Boolean} Returns the subset, object of objects. If no matches, return false.
  */
-const subsetUrlsByUser = function(user, dataset, dataParam='userID') {
+const subsetUrlsByUser = function(user, dataset, dataParam = 'userID') {
   const allOccurrences = {};
   for (let item in dataset) {
     if (dataset[item][dataParam] === user) {
-		allOccurrences[item] = dataset[item];
+      allOccurrences[item] = dataset[item];
+    }
   }
-  }
-  if (Object.keys(allOccurrences).length === 0) { 
-    return false; 
+  if (Object.keys(allOccurrences).length === 0) {
+    return false;
   }
   return allOccurrences;
-}
+};
 
 
 /**
@@ -58,19 +58,23 @@ const subsetUrlsByUser = function(user, dataset, dataParam='userID') {
  * @param {Object} db External object, the "database".
  * @param {Boolean} single Default true, single key matching the search. If false, subset of all matching params.
  * @returns {String/Object/Boolean} If single=true, returns key; if false, returns subset. If no matches, return false.
- * 
+ *
  * NOTE: In the application, it was applied for 2 very different things. REPLACED BY: findUserByEmail and subsetUrlsByUser
  * Still exported for testing purposes: it works and testing script illustrates how.
  */
- const retrieveInfo = function(checkParam, dbParam, db, single=true) {
+const retrieveInfo = function(checkParam, dbParam, db, single = true) {
   const allOccurrences = {};
   for (let item in db) {
     if (db[item][dbParam] === checkParam) {
-		if (single) { return item; }
-		allOccurrences[item] = db[item];
+      if (single) {
+        return item;
+      }
+      allOccurrences[item] = db[item];
+    }
   }
+  if (Object.keys(allOccurrences).length === 0) {
+    return false;
   }
-  if (Object.keys(allOccurrences).length === 0) { return false; }
   return allOccurrences;
 };
 

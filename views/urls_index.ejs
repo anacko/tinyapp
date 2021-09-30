@@ -20,6 +20,8 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Times visited</th>
+          <th scope="col">Created at</th>
           <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
@@ -29,6 +31,8 @@
           <tr>
             <td><a style="color: #222" href=<%= urls[url].longURL %>><%= url %></td></a>
             <td><%= urls[url].longURL %></td>
+            <td><%= urls[url].timesVisited %></td>
+            <td><%= urls[url].creationDate.split(' ').splice(1,3).join(' ') %></td>
             <td><form method="GET" action="/urls/<%= url %>"><button type="update" class="btn btn-outline-primary">Edit</button></form></td>
             <td><form method="POST" action="/urls/<%= url %>/delete"><button type="delete" class="btn btn-outline-danger">Delete</button></form></td>
           </tr>
